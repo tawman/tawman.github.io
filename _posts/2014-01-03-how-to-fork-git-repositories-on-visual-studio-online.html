@@ -1,0 +1,197 @@
+---
+layout: single
+title:  "How-To Fork Git Repositories on Visual Studio Online"
+date:   2014-01-03 00:00:00 -0600
+categories: git github VSO
+tags: git github VSO
+permalink: /:year/:month/:title/
+---
+
+<h2>Visual Studio Online</h2>
+<p>Microsoft rebranded Team Foundation Service as
+    <a title="http://www.visualstudio.com/products/visual-studio-online-overview-vs"
+        href="http://www.visualstudio.com/products/visual-studio-online-overview-vs" target="_blank">Visual Studio Online</a> with the launch of Visual Studio 2013 last fall. Visual Studio Online enables team collaboration
+    using either Git or TFS source code control directly inside Visual Studio 2013, web browser, or the command line. Microsoft
+    is entering a space dominated by
+    <a href="https://github.com/" target="_blank">GitHub</a> &amp;
+    <a href="https://bitbucket.org/" target="_blank">Bitbucket</a>, and developers will seek familiar workflows and features offered by by these platforms.</p>
+<h2>GitHub Fork</h2>
+<p>GitHub established the paradigm of forking, upstream repositories, and pull requests for a lot of developers.
+    <a href="http://stackoverflow.com/users/6309/vonc"
+        target="_blank">VonC</a> put together a nice graphic to illustrate the relationship of repositories in his response to a
+    <a href="http://stackoverflow.com/questions/6286571/git-fork-is-git-clone"
+        target="_blank">Stack Overflow question</a> on the topic.</p>
+<p>
+    <a href="http://stackoverflow.com/questions/6286571/git-fork-is-git-clone" target="_blank">
+        <img title="Fork" style="border-left-width: 0px; border-right-width: 0px; background-image: none; border-bottom-width: 0px; float: none; padding-top: 0px; padding-left: 0px; margin-left: auto; display: block; padding-right: 0px; border-top-width: 0px; margin-right: auto"
+            border="0" alt="Fork" src="/assets/images/Fork.png" width="450" height="469">
+    </a>
+</p>
+<p>GitHub simplifies the process of forking an upstream repository with the simple click of the Fork button:</p>
+<p>
+    <img title="ForkButtonCropped" style="border-left-width: 0px; border-right-width: 0px; background-image: none; border-bottom-width: 0px; float: none; padding-top: 0px; padding-left: 0px; margin-left: auto; display: block; padding-right: 0px; border-top-width: 0px; margin-right: auto"
+        border="0" alt="ForkButtonCropped" src="/assets/images/ForkButtonCropped.png" width="533" height="188">
+</p>
+<h2>Visual Studio Online Fork</h2>
+<p>Visual Studio Online might not currently have a Fork button but the process of forking Git repositories between accounts
+    is quite straightforward and involves:</p>
+<ol>
+    <li>Creating the target project to contain the fork repository
+        <li>Cloning the upstream repository
+            <li>Adding a remote origin link to the fork
+                <li>Pushing the cloned repository to the fork origin</li>
+</ol>
+<p>In this scenario, I will fork a Git repository name
+    <em>VisualStudioOnlineFork</em> from an upstream master repository located in
+    <em>woodcp.visualstudio.com</em> to a fork project located in
+    <em>toddwood.visualstudio.com</em> using the owner account of the fork repository. The fork project owner account had access
+    granted to the upstream repository by the upstream owner account.</p>
+<p>
+    <a href="/assets/images/UpstreamRepo.png">
+        <img title="UpstreamRepo" style="border-left-width: 0px; border-right-width: 0px; background-image: none; border-bottom-width: 0px; padding-top: 0px; padding-left: 0px; display: inline; padding-right: 0px; border-top-width: 0px"
+            border="0" alt="UpstreamRepo" src="/assets/images/UpstreamRepo_thumb.png" width="644" height="398">
+    </a>
+</p>
+<h3>Create Fork Repository</h3>
+<p>Login to the fork account and create a new team project named the same as the upstream repository. Technically the names
+    do not need to match but that is the convention established by the GitHub Fork button.</p>
+<p>
+    <a href="/assets/images/CreateTargetFork.png">
+        <img title="CreateTargetFork" style="border-left-width: 0px; border-right-width: 0px; background-image: none; border-bottom-width: 0px; padding-top: 0px; padding-left: 0px; display: inline; padding-right: 0px; border-top-width: 0px"
+            border="0" alt="CreateTargetFork" src="/assets/images/CreateTargetFork_thumb.png" width="644" height="442">
+    </a>
+</p>
+<p>Once the project is created, Visual Studio Online will display the empty repository and instructions on how to set the remote
+    and push the upstream or any existing repository:</p>
+<p>
+    <a href="/assets/images/BareRepository.png">
+        <img title="BareRepository" style="border-left-width: 0px; border-right-width: 0px; background-image: none; border-bottom-width: 0px; padding-top: 0px; padding-left: 0px; display: inline; padding-right: 0px; border-top-width: 0px"
+            border="0" alt="BareRepository" src="/assets/images/BareRepository_thumb.png" width="552" height="484">
+    </a>
+</p>
+<h3>Clone Upstream Repository</h3>
+<p>With the target and empty fork repository created, we can clone the upstream repository to our local computer. Access the
+    upstream repository in Visual Studio Online if you need&nbsp; to identify the clone Url:</p>
+<p>
+    <a href="/assets/images/CloneUrl.png">
+        <img title="CloneUrl" style="border-left-width: 0px; border-right-width: 0px; background-image: none; border-bottom-width: 0px; padding-top: 0px; padding-left: 0px; display: inline; padding-right: 0px; border-top-width: 0px"
+            border="0" alt="CloneUrl" src="/assets/images/CloneUrl_thumb.png" width="552" height="484">
+    </a>
+</p>
+<p>A nice feature of the
+    <font face="Courier New">git clone</font> command is to set the origin name to upstream when cloning the master repository using the
+    <font face="Courier New">--origin=upstream</font> directive:</p>
+<pre>C:\&gt; mkdir fork
+    Directory: C:\
+Mode                LastWriteTime     Length Name
+----                -------------     ------ ----
+d----          1/3/2014   8:58 PM            fork
+
+C:\&gt; cd fork
+
+C:\fork&gt; git clone --origin=upstream https://woodcp.visualstudio.com/DefaultCollection/_git/VisualStudioOnlineFork
+Cloning into 'VisualStudioOnlineFork'...
+remote:
+remote:                    fTfs
+remote:                  fSSSSSSSs
+remote:                fSSSSSSSSSS
+remote: TSSf         fSSSSSSSSSSSS
+remote: SSSSSF     fSSSSSSST SSSSS
+remote: SSfSSSSSsfSSSSSSSt   SSSSS
+remote: SS  tSSSSSSSSSs      SSSSS
+remote: SS   fSSSSSSST       SSSSS
+remote: SS fSSSSSFSSSSSSf    SSSSS
+remote: SSSSSST    FSSSSSSFt SSSSS
+remote: SSSSt        FSSSSSSSSSSSS
+remote:                FSSSSSSSSSS
+remote:                  FSSSSSSs
+remote:                    FSFs    (TM)
+remote:
+remote:  Microsoft (R) Visual Studio (R) Team Foundation Server
+remote:
+Unpacking objects: 100% (3/3), done.
+Checking connectivity... done
+</pre>
+<h3>Configure Remote Origin</h3>
+<p>At this point, we have cloned the repository with only a remote named upstream pointing to the master repository. Referencing
+    the bare repository instructions in the fork repository, we add the remote origin pointing to the fork repository location:</p>
+<pre>C:\fork&gt; cd .\VisualStudioOnlineFork
+
+C:\fork\VisualStudioOnlineFork [master]&gt; git remote add origin https://toddwood.visualstudio.com/DefaultCollection/_git/VisualStudioOnlineFork
+</pre>
+<h3>Push to Fork</h3>
+<p>Once again, using the bare repository instructions we perform a
+    <font face="Courier New">git push -u origin --all</font> to complete the fork process:</p>
+<pre>C:\fork\VisualStudioOnlineFork [master]&gt; git push -u origin --all
+Counting objects: 3, done.
+Writing objects: 100% (3/3), 250 bytes | 0 bytes/s, done.
+Total 3 (delta 0), reused 0 (delta 0)
+remote: Analyzing objects (3/3) (2 ms)
+remote: Storing pack file and index...  done (800 ms)
+To https://toddwood.visualstudio.com/DefaultCollection/_git/VisualStudioOnlineFork
+ * [new branch]      master -&gt; master
+Branch master set up to track remote branch master from origin.
+</pre>
+<p>The fork of the upstream repository is now complete and available in Visual Studio Online:</p>
+<p>
+    <a href="/assets/images/ForkRefreshView.png">
+        <img title="ForkRefreshView" style="border-left-width: 0px; border-right-width: 0px; background-image: none; border-bottom-width: 0px; padding-top: 0px; padding-left: 0px; display: inline; padding-right: 0px; border-top-width: 0px"
+            border="0" alt="ForkRefreshView" src="/assets/images/ForkRefreshView_thumb.png" width="644" height="322">
+    </a>
+</p>
+<h2>Visual Studio Online Merge Upstream Changes</h2>
+<p>As time progresses the upstream repository will diverge from the forked repository. The fork maintainer can easily merge
+    the upstream changes by fetching from upstream, merging master, and pushing to origin. This process is no different than
+    when dealing with GitHub hosted repositories.</p>
+<h3>Upstream Changes</h3>
+<pre>C:\WCP\VisualStudioOnlineFork [master]&gt; echo Downstream Merge &gt;&gt; .\README.md
+C:\WCP\VisualStudioOnlineFork [master +0 ~1 -0]&gt; echo MIT &gt;LICENSE.md
+C:\WCP\VisualStudioOnlineFork [master +1 ~1 -0 !]&gt; git add -A
+C:\WCP\VisualStudioOnlineFork [master +1 ~1 -0]&gt; git commit -m "Added LICENSE and updated README"
+[master 7f7d2ab] Added LICENSE and updated README
+ 2 files changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 LICENSE.md
+C:\WCP\VisualStudioOnlineFork [master]&gt; git push
+Counting objects: 6, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (4/4), 368 bytes | 0 bytes/s, done.
+Total 4 (delta 0), reused 0 (delta 0)
+remote: Analyzing objects (4/4) (2 ms)
+remote: Storing pack file and index...  done (374 ms)
+To https://woodcp.visualstudio.com/DefaultCollection/_git/VisualStudioOnlineFork
+   d2c3b1a..7f7d2ab  master -&gt; master
+C:\WCP\VisualStudioOnlineFork [master]&gt;
+</pre>
+<h3>Downstream Merge</h3>
+<pre>C:\WCP\VisualStudioOnlineFork [master]&gt; cd C:\fork\VisualStudioOnlineFork
+C:\fork\VisualStudioOnlineFork [master]&gt; git fetch upstream
+remote: Microsoft (R) Visual Studio (R) Team Foundation Server
+Unpacking objects: 100% (4/4), done.
+From https://woodcp.visualstudio.com/DefaultCollection/_git/VisualStudioOnlineFork
+   d2c3b1a..7f7d2ab  master     -&gt; upstream/master
+C:\fork\VisualStudioOnlineFork [master]&gt; git merge master upstream/master
+Updating d2c3b1a..7f7d2ab
+Fast-forward
+ LICENSE.md | Bin 0 -&gt; 12 bytes
+ README.md  | Bin 26 -&gt; 64 bytes
+ 2 files changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 LICENSE.md
+C:\fork\VisualStudioOnlineFork [master]&gt; git push
+Counting objects: 6, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (4/4), 368 bytes | 0 bytes/s, done.
+Total 4 (delta 0), reused 0 (delta 0)
+remote: Analyzing objects (4/4) (2 ms)
+remote: Storing pack file and index...  done (496 ms)
+To https://toddwood.visualstudio.com/DefaultCollection/_git/VisualStudioOnlineFork
+   d2c3b1a..7f7d2ab  master -&gt; master
+C:\fork\VisualStudioOnlineFork [master]&gt;
+</pre>
+<h2>Conclusion</h2>
+<p>I am a big fan of GitHub but when your clients decide to use Visual Studio Online that is exactly what you do. However, this
+    does not mean you need to abandon certain Git repository work flows and setups that are proven to work.</p>
+<p>I have been using Visual Studio Online for the past three months without any complaints. The integration with Visual Studio
+    2013 is very nice and the agile management online is well done. The lack of a Fork button on Visual Studio Online is
+    a minor inconvenience considering the process of forking repositories is still possible as I demonstrated.</p>

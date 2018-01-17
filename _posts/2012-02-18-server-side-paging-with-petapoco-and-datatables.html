@@ -1,0 +1,85 @@
+---
+layout: single
+title:  "Server-Side Paging with PetaPoco and DataTables"
+date:   2012-02-18 00:00:00 -0600
+categories: DataTables PetaPoco
+tags: DataTables PetaPoco
+permalink: /:year/:month/:title/
+---
+
+<p>TL;DR – Server-side paging of table data is not only faster and more responsive, but very easy to implement with
+    <a href="http://www.toptensoftware.com/petapoco/" target="_blank">PetaPoco</a> and
+    <a href="http://datatables.net/" target="_blank">DataTables</a>. I will demonstrate how millisecond response times are still possible even when dealing with a million
+    rows of data.</p>
+<p>This blog post can be forked on
+    <a href="https://github.com/tawman/PetaPocoPage" target="_blank">GitHub: tawman / PetaPocoPage</a>.</p>
+<h2>Sample Web Site and Data</h2>
+<p>For the sample web site, I used the
+    <a href="http://spawner.sourceforge.net/" target="_blank">Spawner Data Generator</a> tool to generate 1,000,000 rows of test data for use in this example. As you can see from
+    the timings, each table grid page request is limited to approximately 1.25 KB of data and a response time around 75 milliseconds.
+</p>
+<p>
+    <img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: inline; border-top-width: 0px; border-bottom-width: 0px; border-left-width: 0px; padding-top: 0px"
+        title="SiteTimings" border="0" alt="SiteTimings" src="/assets/images/SiteTimings.jpg" width="630" height="586">
+</p>
+<p>On my current project, we initially used
+    <a href="http://tablesorter.com/docs/" target="_blank">jQuery tablesorter</a> with a table loading between 1,000 and 1,500 detail records for a report. There was a noticeable
+    delay of a couple seconds while the data loaded. Obviously, we needed to implement server-side paging and I knew
+    <a href="http://www.toptensoftware.com/petapoco/" target="_blank">PetaPoco</a> could help on the backend. However, tablesorter had some other issues with searching paged tables that lead
+    me to discover
+    <a href="http://datatables.net/" target="_blank">DataTables</a>
+</p>
+<h2>DataTables</h2>
+<p>DataTables is a great extensible jQuery plug-in and satisfied our searching, paging, and server-side processing requirements.
+    The only negative issue I had is cosmetic since DataTables uses
+    <a href="http://en.wikipedia.org/wiki/Hungarian_notation" target="_blank">Hungarian notation</a>. The other features and extensibility options shine through making DataTables an excellent client
+    side UI choice.</p>
+<h3>Client Side Setup</h3>
+<p>Wiring up a view table with DataTables is very simple, and adding the server-side callbacks and Twitter Bootstrap formatting
+    is also very straight forward. In my example view, there is very little markup required and actually no model is provided:</p>
+<script src="https://gist.github.com/1861582.js"></script>
+<p>The sample project also includes some additional JavaScript to setup a 500 ms filtering delay before sending the search term
+    back to the server, pagination styling, and CSS styling. Fortunately, the DataTables library is thoroughly documented
+    on its web site along with these extension configurations.</p>
+<h3>Server Side Setup</h3>
+<p>DataTables will POST a JSON request back to the server Controller that I process with a custom
+    <em>IModelBinder</em> to keep the Controller code clean and remove the Hungarian notation:</p>
+<script src="https://gist.github.com/1861621.js"></script>
+<p>The combination of the
+    <em>IModelBinder</em> and a helper method to format the DataTable response keeps the Controller action code simple:</p>
+<script src="https://gist.github.com/1861623.js"></script>
+<p>The DataTable response formatter simply combines the
+    <em>DataTablesPageRequest</em> object with the PetaPoco
+    <em>Page&lt;Customer&gt;</em> object into a JSON response expected by DataTables:</p>
+<script src="https://gist.github.com/1861658.js"></script>
+<p>Fortunately, the DataTable request and response object formats are very compatible with how PetaPoco support paging.</p>
+<h2>PetaPoco</h2>
+<p>PetaPoco makes it very simple and efficient to issue paged queries to SQL Server and it handles the query rewrite to use
+    <em>ROW_NUMBER</em> for you. The resulting PetaPoco
+    <em>Page&lt;T&gt;</em> object makes it easy to interface with the DataTables response object:</p>
+<pre><code>
+public class Page&lt;T&gt; where T:new()
+{
+    public long CurrentPage { get; set; }
+    public long ItemsPerPage { get; set; }
+    public long TotalPages { get; set; }
+    public long TotalItems { get; set; }
+    public List&lt;T&gt; Items { get; set; }
+}</code></pre>
+<p>To support the DataTables searching and ordering in my sample project, I used some helper methods to apply the search criteria
+    against all columns and order by the columns selected. The resulting repository method to handle the PetaPoco Page&lt;T&gt;
+    query request is quite straightforward:</p>
+<script src="https://gist.github.com/1861686.js"></script>
+<p>In the end, it does not matter if you are dealing with 100, 1,000, or 1,000,000 rows of data. You can still achieve fast
+    page response times and low latency calls to your backend database to serve data up one page at a time. The following
+    timings are from pressing the Next page link 7 times:</p>
+<p>
+    <img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: inline; border-top-width: 0px; border-bottom-width: 0px; border-left-width: 0px; padding-top: 0px"
+        title="Timings" border="0" alt="Timings" src="/assets/images/Timings.png" width="634" height="351">
+</p>
+<h2>Conclusion</h2>
+<p>The million row sample data is not a practical use case and merely used to illustrate a point. In fact, I reduced the sample
+    data down to 4,000 rows for publishing on GitHub as a 250 MB database is not very clone friendly. Have a look at the
+    project source on
+    <a href="https://github.com/tawman/PetaPocoPage" target="_blank">GitHub: tawman / PetaPocoPage</a> and I hope it provides a useful reference for someone faced with a similar challenge.</p>
+<p>DataTables and PetaPoco were made to page together.</p>

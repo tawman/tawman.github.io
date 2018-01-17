@@ -1,0 +1,181 @@
+---
+layout: single
+title:  "PetaPoco DoddleReport Dynamic PIVOT Query"
+date:   2012-02-11 00:00:00 -0600
+categories: DoddleReport PetaPoco
+tags: DoddleReport PetaPoco
+permalink: /:year/:month/:title/
+---
+<p>
+	TL;DR – Sample ASP.NET MVC3 application demonstrating how to load PIVOT query results as a dynamic object with
+	<a href="http://www.toptensoftware.com/petapoco/" target="_blank">PetaPoco</a> and exporting the data to Excel using
+	<a href="http://doddlereport.codeplex.com/" target="_blank">DoddleReport</a>.
+</p>
+<p>
+	This blog post can be forked on
+	<a href="https://github.com/tawman/PetaPocoPivot" target="_blank">GitHub: tawman / PetaPocoPivot</a>.
+</p>
+<h2>Dynamic Data Structures with PIVOT</h2>
+<p>SQL Server 2008 R2 provides the capability to
+	<a href="http://msdn.microsoft.com/en-us/library/ms177410.aspx" target="_blank">PIVOT and UNPIVOT</a> table data depending on your need to flatten rows into columns or columns into rows. In our case,
+	we needed to transform multiple rows of employee expiration dates into a single employee row with columns for each requirement
+	expiration date.</p>
+<h3>SQL PIVOT Query Example</h3>
+<p>The following source data is used to illustrate a SQL PIVOT query in action:
+	<table border="1">
+		<thead>
+			<tr>
+				<th>Employee</th>
+				<th>Requirement</th>
+				<th>Expiration Date</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>John Doe</td>
+				<td>Alpha</td>
+				<td>01/12/2011</td>
+			</tr>
+			<tr>
+				<td>John Doe</td>
+				<td>Bravo</td>
+				<td>11/07/2012</td>
+			</tr>
+			<tr>
+				<td>John Doe</td>
+				<td>Charlie</td>
+				<td>
+					<em>NULL</em>
+				</td>
+			</tr>
+			<tr>
+				<td>John Doe</td>
+				<td>Delta</td>
+				<td>10/11/2009</td>
+			</tr>
+			<tr>
+				<td>Sally Smith</td>
+				<td>Bravo</td>
+				<td>05/10/2012</td>
+			</tr>
+			<tr>
+				<td>Sally Smith</td>
+				<td>Charlie</td>
+				<td>07/04/2012</td>
+			</tr>
+			<tr>
+				<td>Sally Smith</td>
+				<td>Echo</td>
+				<td>08/31/2012</td>
+			</tr>
+		</tbody>
+	</table>
+</p>
+<p>A simple SQL PIVOT query to transform the data:</p>
+<script src="https://gist.github.com/tawman/4fb482eeefe3d91c2616c3e1ae5abbdf.js"></script>
+<p>
+	The following table illustrates the results of the SQL PIVOT query:
+</p>
+<table border="1">
+	<thead>
+		<tr>
+			<th>Employee</th>
+			<th>Alpha</th>
+			<th>Bravo</th>
+			<th>Charlie</th>
+			<th>Delta</th>
+			<th>Echo</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>John Doe</td>
+			<td>01/12/2011</td>
+			<td>11/07/2012</td>
+			<td>&nbsp;</td>
+			<td>10/11/2009</td>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
+			<td>Sally Smith</td>
+			<td>&nbsp;</td>
+			<td>05/10/2012</td>
+			<td>07/04/2012</td>
+			<td>&nbsp;</td>
+			<td>08/31/2012</td>
+		</tr>
+	</tbody>
+</table>
+<h3>Data Driven Object Structure</h3>
+<p>Obviously, defining a POCO object to load the PIVOT data ahead of time is not possible if the aggregated column values are
+	not known until runtime. Our initial implementation bypassed PetaPoco entirely and used a
+	<em>DataTable</em> to export the data to Excel using DoddleReport. Working around PetaPoco did not seem right so I looked for
+	an alternate approach involving PetaPoco.</p>
+<h2>PetaPoco and Dynamic Types</h2>
+<p>Fortunately, C# provides a
+	<a href="http://msdn.microsoft.com/en-us/library/dd264741.aspx" target="_blank">dynamic type</a> but I did not know if PetaPoco and DoddleReport could support this option. Every time I think we pushed
+	PetaPoco to its limit, I learn that it has more tricks up its sleeve. I decided to not even consult the documentation and
+	wired it up to see if we could return an
+	<em>IEnumerable&lt;dynamic&gt;</em> instead of a
+	<em>DataTable</em>.</p>
+<p>The answer came as no surprise when coding the PIVOT query into the Repository that PetaPoco could care less if you actually
+	had a POCO:</p>
+<script src="https://gist.github.com/1806105.js"></script>
+<h2>DoddleReport and Dynamic Types</h2>
+<p>Now that PetaPoco was returning a dynamic data set, I needed to figure out what DoddleReport could do with it. I had not
+	worked with DoddleReport up to this point, but quickly located the code in our Controller that performed the export to Excel
+	functionality. I checked the
+	<em>ToReportSource()</em> method overloads and saw it had one for an
+	<em>IEnumerable</em>.</p>
+<p>Typical
+	<em>ReportResult</em> Action with DoddleReport does not require much code, but it sure does a lot behind the scenes:</p>
+<script src="https://gist.github.com/1806138.js"></script>
+<p>My first attempt to run the export with no change to the DoddleReport code was met with a blank export. I
+	<a href="https://twitter.com/#!/iToddWood/status/167737343623696387" target="_blank">tweeted</a> out my status of trying this and
+	<a href="http://www.matthidinger.com/" target="_blank">Matt Hidinger</a> quickly pointed me to the
+	<a href="http://doddlereport.codeplex.com/SourceControl/changeset/view/840affd7397e#src%2fDoddleReport%2fDynamic%2fDynamicReportSource.cs"
+	 target="_blank">DynamicReportSource.cs on CodePlex</a>. I added the
+	<em>DynamicReportSource</em> code as a Helper in my project (Note: There is a
+	<a href="http://nuget.org/packages/DoddleReport.Dynamic" target="_blank">Nuget package</a> for it) and tried to use it. The first issue I ran into was that the code used an
+	<em>ExpandoObject</em>, but I changed it to use
+	<em>dynamic</em> instead. The second issue I ran into was the handling of NULL values, but I worked around this by using a
+	<em>new object()</em> when the
+	<em>t.Value</em> is null.</p>
+<p>Modified DoddleReport
+	<em>DynamicReportSource.cs</em> file used:</p>
+<script src="https://gist.github.com/1784079.js"></script>
+<h2>Dynamic PetaPoco and DoddleReport</h2>
+<p>With the final changes to DoddleReport in place, our project now supports exporting PIVOT reports to Microsoft Excel. I put
+	together a
+	<a href="https://github.com/tawman/PetaPocoPivot" target="_blank">sample ASP.NET MVC3 application</a> that demonstrates the flow of the dynamic data from SQL Server via PetaPoco and DoddleReport
+	to Excel.</p>
+<h3>Standard MVC ActionResult View</h3>
+<p>The default Index action displays the dynamic data in a normal table view by iterating over the dynamic results:
+	<img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: inline; border-top-width: 0px; border-bottom-width: 0px; border-left-width: 0px; padding-top: 0px"
+	 title="PivotWebExample" border="0" alt="PivotWebExample" src="/assets/images/PivotWebExample.png" width="630" height="395">
+</p>
+<h3>Exporting Data to Excel</h3>
+<p>The
+	<em>DoddleReport Excel</em> link in the header will call the /Home/PivotReport
+	<em>.xlsx</em> ReportAction to trigger the export to Excel. The .xlsx extension it what tells DoddleReport we want an Excel
+	result:
+</p>
+<p>
+	<img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: inline; border-top-width: 0px; border-bottom-width: 0px; border-left-width: 0px; padding-top: 0px"
+	 title="PivotExcelExample" border="0" alt="PivotExcelExample" src="/assets/images/PivotExcelExample.png" width="630" height="435">
+</p>
+<h3>Generating a Default HTML View</h3>
+<p>If you leave off the extension like the DoddleReport HTML header link does, then DoddleReport will generate the HTML view
+	similar to the Index view I coded:
+	<img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: inline; border-top-width: 0px; border-bottom-width: 0px; border-left-width: 0px; padding-top: 0px"
+	 title="PivotDoddleHtmlExample" border="0" alt="PivotDoddleHtmlExample" src="/assets/images/PivotDoddleHtmlExample.png" width="630"
+	 height="395">
+</p>
+<p>DoddleReport supports additional formats like PDF, but I did not add the necessary Nuget packages to support it. With the
+	proper library references in place, all it takes to generate a PDF is to add the .PDF extension to the ReportResult Action
+	URL and DoddleReport will happily generate it for you.</p>
+<h2>Conclusion</h2>
+<p>Yet again I learned to never underestimate PetaPoco. I now have the same respect for DoddleReport as it makes a dynamic teammate
+	with PetaPoco to deliver Excel exports based on our PIVOT query results.</p>
+<p>I hope you found this blog post helpful and be sure to check out the full source code on
+	<a href="https://github.com/tawman/PetaPocoPivot" target="_blank">GitHub: tawman / PetaPocoPivot</a> to see this dynamic pair in action.</p>

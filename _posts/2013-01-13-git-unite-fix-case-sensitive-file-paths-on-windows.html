@@ -1,0 +1,200 @@
+---
+layout: single
+title:  "Git Unite - Fix Case Sensitive File Paths on Windows"
+date:   2013-01-13 00:00:00 -0600
+categories: git
+tags: git github windows
+permalink: /:year/:month/:title/
+---
+
+<p>
+    <a title="git-unite on GitHub" href="https://github.com/tawman/git-unite" target="_blank">Git Unite</a> is a utility that fixes case sensitive file paths present in a git repository index on Windows. Since Windows
+    is not case sensitive, the git index case sensitivity issue does not manifest itself until browsing the code repository
+    on GitHub or cloning the repository to a case sensitive file system on Linux.</p>
+<p>Introducing case sensitive file paths into the git index on a case insensitive operating system like Windows is easier than
+    you think. A simple ‘
+    <em>git mv .\Where\Waldo where\is\Waldo</em>' is all you need to create two separate paths in the git index, but the Windows
+    working directory will only report one. There might be
+    <em>git config</em> settings that help avoid this problem, but controlling the settings and behavior of 20+ contributors
+    on a project team is nearly impossible.</p>
+<p>The problem is exacerbated when hundreds of files are moved during a repository layout reorganization. If the user moving
+    the files is not careful, these case sensitive path names will pollute the git index but appear fine in the working directory.
+    Cleaning up these case sensitive file path issues on Windows is tedious, and this is where Git Unite helps out.</p>
+<p>Git Unite will search the git repository index for file paths that do not match the same case that Windows is using. For
+    each git index path case mismatch found, Git Unite will update the git index entry with the case reported by the Windows
+    file system.</p>
+<h2>Usage</h2>
+<pre>Usage: Git.Unite [OPTIONS]+ repository
+Unite the git repository index file paths with current Windows case usage.
+If no repository path is specified, the current directory is used.
+
+Options:
+      --dry-run              dry run without making changes
+  -h, --help                 show this message and exit
+</pre>
+<h2>History</h2>
+<p>I work on a project that has one particular git repository tracking over 7,000 files. The repository contains a mixture of
+    ASP.NET MVC3 code, SQL Server SSIS ETL packages, and PowerShell scripts. It all started one day when an ETL developer
+    could not locate the package she developed on the GitHub web site.</p>
+<p>I took a look at the git repository on her machine and the ETL package was clearly there under an
+    <em>Etl\Some\Dir\Path</em> folder. The repository reported being up to date with origin/master, but it took several minutes
+    before I noticed an
+    <em>etl</em> and
+    <em>Etl</em> folder on the GitHub web site.</p>
+<p>It turns out that the ETL team was in the process reorganizing the ETL packages into a new directory structure layout. I
+    booted up a VM running Ubuntu and cloned the repository down to a case sensitive file system. I found 694 ETL files that
+    were tracked in the git index with a directory path case different than the one reported by the Windows file system.</p>
+<p>I fixed the problem by using a combination of
+    <em>find</em>,
+    <em>sort</em>, and
+    <em>awk</em> to build a bash script to run the 694 git mv commands. This was a painful process that I did not want to repeat
+    so I decided to build a tool anyone on the team could use on Windows to fix the problem.</p>
+<p>In fact, two months later the same issue appeared again in a different repository. This time I was able to install the Git
+    Unite utility on the user’s machine and fix the issue in a couple minutes. We tracked down the source of the problem
+    to a developer that hand-typed the target directory of a git mv command in all lowercase.</p>
+<h2>Example Scenario</h2>
+<p>Here is a representative example using Posh-Git on Windows 7 as to how someone can introduce case sensitive file paths on
+    a case insensitive file system.</p>
+<h3>Step 1 – Create a new git repository and push it to GitHub</h3>
+<pre>C:\demo&gt; mkdir Where
+C:\demo&gt; touch .\Where\Waldo
+C:\demo&gt; touch .\Where\IsHere
+C:\demo&gt; git init .
+Initialized empty Git repository in C:/demo/.git/
+C:\demo [master +1 ~0 -0 !]&gt; git add .
+C:\demo [master +2 ~0 -0]&gt; git commit -m initial
+[master (root-commit) 42ea0fc] initial
+ 0 files changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 Where/IsHere
+ create mode 100644 Where/Waldo
+
+C:\demo [master]&gt; git remote add origin git@github.com:tawman/waldo.git
+C:\demo [master]&gt; git push -u origin master
+Counting objects: 4, done.
+Delta compression using up to 6 threads.
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (4/4), 265 bytes, done.
+Total 4 (delta 0), reused 0 (delta 0)
+To git@github.com:tawman/waldo.git
+ * [new branch]      master -&gt; master
+Branch master set up to track remote branch master from origin.
+</pre>
+<p>When we look on GitHub the repository appears as expected:
+    <a href="/assets/images/Step1.png">
+        <img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: inline; border-top-width: 0px; border-bottom-width: 0px; border-left-width: 0px; padding-top: 0px"
+            title="Initial repository as seen on GitHub" border="0" alt="Initial repository as seen on GitHub" src="/assets/images/Step1_thumb.png"
+            width="644" height="256">
+    </a>
+</p>
+<h3>Step 2 – Start asking some questions</h3>
+<pre>C:\demo [master]&gt; mkdir .\Where\Is
+C:\demo [master]&gt; touch .\Where\Is\He
+C:\demo [master +1 ~0 -0 !]&gt; git add -A
+C:\demo [master +1 ~0 -0]&gt; git commit -m "Good Question"
+[master 3d9006e] Good Question
+ 0 files changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 Where/Is/He
+</pre>
+<p>Keep a close eye on
+    <em>where</em> Waldo is going...</p>
+<pre>C:\demo [master]&gt; git mv .\Where\Waldo where\is\Waldo
+C:\demo [master +0 ~1 -0]&gt; git commit -m "Find Me"
+[master 35f843b] Find Me
+ 1 files changed, 0 insertions(+), 0 deletions(-)
+ rename {Where =&gt; where/is}/Waldo (100%)
+
+C:\demo [master]&gt; find Where
+Where
+Where/Is
+Where/Is/He
+Where/Is/Waldo
+Where/IsHere
+C:\demo [master]&gt; ls
+
+
+    Directory: C:\demo
+
+
+Mode                LastWriteTime     Length Name
+----                -------------     ------ ----
+d----         1/12/2013  10:54 PM            Where
+</pre>
+<p>Seems quite obvious
+    <em>Where</em> Waldo is, but let’s check what GitHub thinks:</p>
+<pre>C:\demo [master]&gt; git push
+Counting objects: 11, done.
+Delta compression using up to 6 threads.
+Compressing objects: 100% (5/5), done.
+Writing objects: 100% (9/9), 683 bytes, done.
+Total 9 (delta 1), reused 0 (delta 0)
+To git@github.com:tawman/waldo.git
+   42ea0fc..35f843b  master -&gt; master
+</pre>
+<p>It would appear that git and GitHub have narrowed down the location of Waldo to one of two possible locations:
+    <a href="/assets/images/Step2.png">
+        <img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: inline; border-top-width: 0px; border-bottom-width: 0px; border-left-width: 0px; padding-top: 0px"
+            title="GitHub is not exactly sure where he is at" border="0" alt="GitHub is not exactly sure where he is at" src="/assets/images/Step2_thumb.png"
+            width="644" height="132">
+    </a>
+</p>
+<h3>Step 3 – Let the confusion begin</h3>
+<pre>C:\demo [master]&gt; ls .\Where\Is\Waldo
+
+
+    Directory: C:\demo\Where\Is
+
+
+Mode                LastWriteTime     Length Name
+----                -------------     ------ ----
+-a---         1/12/2013  10:50 PM          0 Waldo
+</pre>
+<p>According to Windows, Waldo should be hanging out right here:
+    <a href="/assets/images/Step3a.png">
+        <img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: inline; border-top-width: 0px; border-bottom-width: 0px; border-left-width: 0px; padding-top: 0px"
+            title="Is he here?" border="0" alt="Is he here?" src="/assets/images/Step3a_thumb.png" width="644" height="133">
+    </a>Unfortunately, according to git he is hanging out over there:</p>
+<p>
+    <a href="/assets/images/Step3b.png">
+        <img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: inline; border-top-width: 0px; border-bottom-width: 0px; border-left-width: 0px; padding-top: 0px"
+            title="Or is he here?" border="0" alt="Or is he here?" src="/assets/images/Step3b_thumb.png" width="644" height="129">
+    </a>
+</p>
+<h3>Step 4 – Get everyone back on the same page with Git Unite</h3>
+<pre>C:\demo [master]&gt; Git.Unite.exe C:\demo
+C:\demo [master +0 ~1 -0]&gt; git status
+# On branch master
+# Changes to be committed:
+#   (use "git reset HEAD <file>..." to unstage)
+#
+#       renamed:    where/is/Waldo -&gt; Where/Is/Waldo
+#
+C:\demo [master +0 ~1 -0]&gt; git commit -m fixed
+[master 4495f40] fixed
+ 1 files changed, 0 insertions(+), 0 deletions(-)
+ rename {where/is =&gt; Where/Is}/Waldo (100%)
+C:\demo [master]&gt; git push
+Counting objects: 7, done.
+Delta compression using up to 6 threads.
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (4/4), 354 bytes, done.
+Total 4 (delta 0), reused 0 (delta 0)
+To git@github.com:tawman/waldo.git
+   35f843b..4495f40  master -&gt; master
+</pre>
+<p>Git Unite clears up the confusion by reconciling the git index file path with the same case Windows is using. When I go back
+    and look at the repository on GitHub, there is only one place
+    <em>Where</em> Waldo could be:
+    <a href="/assets/images/Step4a.png">
+        <img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: inline; border-top-width: 0px; border-bottom-width: 0px; border-left-width: 0px; padding-top: 0px"
+            title="Everyone is back Where expected" border="0" alt="Everyone is back Where expected" src="/assets/images/Step4a_thumb.png"
+            width="644" height="105">
+    </a> As far as Windows was concerned, Waldo was here the whole time:
+    <a href="/assets/images/Step4b.png">
+        <img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: inline; border-top-width: 0px; border-bottom-width: 0px; border-left-width: 0px; padding-top: 0px"
+            title="I knew he was here the whole time" border="0" alt="I knew he was here the whole time" src="/assets/images/Step4b_thumb.png"
+            width="644" height="152">
+    </a>
+</p>
+<p>
+    <a title="Fork me on GitHub" href="https://github.com/tawman/git-unite" target="_blank">Fork me on GitHub</a>
+</p>

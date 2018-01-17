@@ -1,0 +1,1051 @@
+---
+layout: single
+title:  "Hierarchical Data with PetaPoco Multi-Poco Mapping"
+date:   2012-02-01 00:00:00 -0600
+categories: PetaPoco
+tags: PetaPoco
+permalink: /:year/:month/:title/
+---
+<p>
+    TL;DR – Sample ASP.NET MVC3 application demonstrating how to load hierarchical table data with a single SQL
+    <em>SELECT</em> statement using
+    <a href="http://www.toptensoftware.com/petapoco/" target="_blank">PetaPoco&apos;s</a>&nbsp;
+    <a href="http://www.toptensoftware.com/Articles/115/PetaPoco-Mapping-One-to-Many-and-Many-to-One-Relationships"
+        target="_blank">Multi-Poco mapping feature</a>.
+</p>
+<p>
+    This blog post can be forked on
+    <a href="https://github.com/tawman/PetaPocoHierarchy" target="_blank">GitHub: tawman / PetaPocoHierarchy</a>.
+</p>
+<h2>PetaPoco – A Tiny ORM-ish Thing</h2>
+<p>
+    We are using
+    <a href="http://www.toptensoftware.com/petapoco/" target="_blank">PetaPoco</a> on a current project implementation since our data management needs do not
+    <a href="http://ayende.com/blog/136195/when-should-you-use-nhibernate" target="_blank">rise to the level of NHibernate</a>. I learn something new each time I think we reached the limits of what PetaPoco can
+    achieve for us. The most recent scenario involved loading hierarchical data without introducing a
+    <a href="http://nhprof.com/Learn/Alerts/SelectNPlusOne" target="_blank">SELECT N+1 problem</a>. I will demonstrate how to use the PetaPoco Multi-Poco Mapping Feature to load hierarchical table
+    data with a single SELECT statement.
+</p>
+<h3>Multi-Poco Mapping Feature</h3>
+<p>
+    <img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: inline; border-top-width: 0px; border-bottom-width: 0px; border-left-width: 0px; padding-top: 0px"
+        title="PetaPocoInfoGraphicDisplay" border="0" alt="PetaPocoInfoGraphicDisplay" src="/assets/images//PetaPocoInfoGraphicDisplay.png"
+        width="630" height="298">
+</p>
+<p>
+    The
+    <a href="http://www.toptensoftware.com/Articles/115/PetaPoco-Mapping-One-to-Many-and-Many-to-One-Relationships" target="_blank">PetaPoco – Mapping One-to-Many and Many-to-One Relationships</a>
+    blog article described using the Multi-Poco Mapping Feature for loading one-to-many relationships, but I found the same technique
+    works well with hierarchical data.
+</p>
+<h4>Organization Hierarchical Data Example</h4>
+<p>
+    I built a simple ASP.NET MVC3 website involving an organization hierarchy modeled as a single table with a self-referencing
+    column for the parent organization. The site contains a single page and table to display the hierarchical organization
+    tree.
+</p>
+<p>
+    The DDL used to generate the table in SQL Server 2008 R2 Express is shown in the following gist:
+</p>
+<script src="https://gist.github.com/1700953.js"></script>
+<p>
+The following table illustrates the sample data loaded in the Organization table and used for this demo, but I replaced the Guid values with integers to make the parent-child relationships easier to identify:
+</p>
+<table border="1" cellspacing="0" cellpadding="2" width="606">
+    <thead>
+        <tr>
+            <th width="50">Id</th>
+            <th width="50">ParentId</th>
+            <th width="50">OrganizationCode</th>
+            <th width="450">Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>1</td>
+            <td>MW</td>
+            <td>Midwest</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>1</td>
+            <td>NE</td>
+            <td>Northeast</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>1</td>
+            <td>NW</td>
+            <td>Northwest</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>1</td>
+            <td>SE</td>
+            <td>Southeast</td>
+        </tr>
+        <tr>
+            <td>6</td>
+            <td>1</td>
+            <td>SW</td>
+            <td>Southwest</td>
+        </tr>
+        <tr>
+            <td>7</td>
+            <td>2</td>
+            <td>MI</td>
+            <td>Michigan</td>
+        </tr>
+        <tr>
+            <td>8</td>
+            <td>2</td>
+            <td>IN</td>
+            <td>Indiana</td>
+        </tr>
+        <tr>
+            <td>9</td>
+            <td>2</td>
+            <td>IL</td>
+            <td>Illinois</td>
+        </tr>
+        <tr>
+            <td>10</td>
+            <td>2</td>
+            <td>OH</td>
+            <td>Ohio</td>
+        </tr>
+        <tr>
+            <td>11</td>
+            <td>7</td>
+            <td>WC</td>
+            <td>Wayne</td>
+        </tr>
+        <tr>
+            <td>12</td>
+            <td>7</td>
+            <td>WA</td>
+            <td>Washtenaw</td>
+        </tr>
+        <tr>
+            <td>13</td>
+            <td>11</td>
+            <td>DE</td>
+            <td>Detroit</td>
+        </tr>
+        <tr>
+            <td>14</td>
+            <td>11</td>
+            <td>CA</td>
+            <td>Canton</td>
+        </tr>
+        <tr>
+            <td>15</td>
+            <td>11</td>
+            <td>PM</td>
+            <td>Plymouth</td>
+        </tr>
+        <tr>
+            <td>16</td>
+            <td>12</td>
+            <td>AA</td>
+            <td>Ann Arbor</td>
+        </tr>
+        <tr>
+            <td>17</td>
+            <td>12</td>
+            <td>YP</td>
+            <td>Ypsilanti</td>
+        </tr>
+        <tr>
+            <td>18</td>
+            <td>16</td>
+            <td>UM</td>
+            <td>University of Michigan</td>
+        </tr>
+        <tr>
+            <td>19</td>
+            <td>17</td>
+            <td>EMU</td>
+            <td>Eastern Michigan University</td>
+        </tr>
+    </tbody>
+</table>
+<p>The website uses the following Organization POCO object to store the hierarchical data from the Organization table:</p>
+    <script src="https://gist.github.com/1701086.js"></script>
+<p>Loading the data from SQL Server is accomplished with a single CTE query, but processed by PetaPoco with a custom helper
+    method to transform the query results. The Organization Repository
+    <em>GetAll()</em> method invokes the PetaPoco Multi-Poco Mapping feature as follows:</p>
+    <script src="https://gist.github.com/1721103.js"></script>
+<p>The CTE query prepares the Organization data for processing by the custom Multi-Poco Mapping Helper
+    <em>OrganizationParentRelator().BuildHierarchy</em> with the following query result set
+    (<em>only last 4 of Guid shown</em>):</p>
+<table style="font-size: 90%" border="1" cellspacing="0" cellpadding="0">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Parent</th>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Id</th>
+            <th>Parent</th>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Level</th>
+            <th>LinkId</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>5D6B</td>
+            <td>26A5</td>
+            <td>SW</td>
+            <td>Southwest</td>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>1</td>
+            <td>5D6B</td>
+        </tr>
+        <tr>
+            <td>5D6B</td>
+            <td>26A5</td>
+            <td>SW</td>
+            <td>Southwest</td>
+            <td>5D6B</td>
+            <td>26A5</td>
+            <td>SW</td>
+            <td>Southwest</td>
+            <td>0</td>
+            <td>5D6B</td>
+        </tr>
+        <tr>
+            <td>FACC</td>
+            <td>BF51</td>
+            <td>WC</td>
+            <td>Wayne</td>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>3</td>
+            <td>FACC</td>
+        </tr>
+        <tr>
+            <td>FACC</td>
+            <td>BF51</td>
+            <td>WC</td>
+            <td>Wayne</td>
+            <td>88BB</td>
+            <td>26A5</td>
+            <td>MW</td>
+            <td>Midwest</td>
+            <td>2</td>
+            <td>FACC</td>
+        </tr>
+        <tr>
+            <td>FACC</td>
+            <td>BF51</td>
+            <td>WC</td>
+            <td>Wayne</td>
+            <td>BF51</td>
+            <td>88BB</td>
+            <td>MI</td>
+            <td>Michigan</td>
+            <td>1</td>
+            <td>FACC</td>
+        </tr>
+        <tr>
+            <td>FACC</td>
+            <td>BF51</td>
+            <td>WC</td>
+            <td>Wayne</td>
+            <td>FACC</td>
+            <td>BF51</td>
+            <td>WC</td>
+            <td>Wayne</td>
+            <td>0</td>
+            <td>FACC</td>
+        </tr>
+        <tr>
+            <td>BF51</td>
+            <td>88BB</td>
+            <td>MI</td>
+            <td>Michigan</td>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>2</td>
+            <td>BF51</td>
+        </tr>
+        <tr>
+            <td>BF51</td>
+            <td>88BB</td>
+            <td>MI</td>
+            <td>Michigan</td>
+            <td>88BB</td>
+            <td>26A5</td>
+            <td>MW</td>
+            <td>Midwest</td>
+            <td>1</td>
+            <td>BF51</td>
+        </tr>
+        <tr>
+            <td>BF51</td>
+            <td>88BB</td>
+            <td>MI</td>
+            <td>Michigan</td>
+            <td>BF51</td>
+            <td>88BB</td>
+            <td>MI</td>
+            <td>Michigan</td>
+            <td>0</td>
+            <td>BF51</td>
+        </tr>
+        <tr>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>0</td>
+            <td>26A5</td>
+        </tr>
+        <tr>
+            <td>3661</td>
+            <td>FACC</td>
+            <td>PM</td>
+            <td>Plymouth</td>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>4</td>
+            <td>3661</td>
+        </tr>
+        <tr>
+            <td>3661</td>
+            <td>FACC</td>
+            <td>PM</td>
+            <td>Plymouth</td>
+            <td>88BB</td>
+            <td>26A5</td>
+            <td>MW</td>
+            <td>Midwest</td>
+            <td>3</td>
+            <td>3661</td>
+        </tr>
+        <tr>
+            <td>3661</td>
+            <td>FACC</td>
+            <td>PM</td>
+            <td>Plymouth</td>
+            <td>BF51</td>
+            <td>88BB</td>
+            <td>MI</td>
+            <td>Michigan</td>
+            <td>2</td>
+            <td>3661</td>
+        </tr>
+        <tr>
+            <td>3661</td>
+            <td>FACC</td>
+            <td>PM</td>
+            <td>Plymouth</td>
+            <td>FACC</td>
+            <td>BF51</td>
+            <td>WC</td>
+            <td>Wayne</td>
+            <td>1</td>
+            <td>3661</td>
+        </tr>
+        <tr>
+            <td>3661</td>
+            <td>FACC</td>
+            <td>PM</td>
+            <td>Plymouth</td>
+            <td>3661</td>
+            <td>FACC</td>
+            <td>PM</td>
+            <td>Plymouth</td>
+            <td>0</td>
+            <td>3661</td>
+        </tr>
+        <tr>
+            <td>D24E</td>
+            <td>88BB</td>
+            <td>IL</td>
+            <td>Illinois</td>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>2</td>
+            <td>D24E</td>
+        </tr>
+        <tr>
+            <td>D24E</td>
+            <td>88BB</td>
+            <td>IL</td>
+            <td>Illinois</td>
+            <td>88BB</td>
+            <td>26A5</td>
+            <td>MW</td>
+            <td>Midwest</td>
+            <td>1</td>
+            <td>D24E</td>
+        </tr>
+        <tr>
+            <td>D24E</td>
+            <td>88BB</td>
+            <td>IL</td>
+            <td>Illinois</td>
+            <td>D24E</td>
+            <td>88BB</td>
+            <td>IL</td>
+            <td>Illinois</td>
+            <td>0</td>
+            <td>D24E</td>
+        </tr>
+        <tr>
+            <td>DCAC</td>
+            <td>BF51</td>
+            <td>WA</td>
+            <td>Washtenaw</td>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>3</td>
+            <td>DCAC</td>
+        </tr>
+        <tr>
+            <td>DCAC</td>
+            <td>BF51</td>
+            <td>WA</td>
+            <td>Washtenaw</td>
+            <td>88BB</td>
+            <td>26A5</td>
+            <td>MW</td>
+            <td>Midwest</td>
+            <td>2</td>
+            <td>DCAC</td>
+        </tr>
+        <tr>
+            <td>DCAC</td>
+            <td>BF51</td>
+            <td>WA</td>
+            <td>Washtenaw</td>
+            <td>BF51</td>
+            <td>88BB</td>
+            <td>MI</td>
+            <td>Michigan</td>
+            <td>1</td>
+            <td>DCAC</td>
+        </tr>
+        <tr>
+            <td>DCAC</td>
+            <td>BF51</td>
+            <td>WA</td>
+            <td>Washtenaw</td>
+            <td>DCAC</td>
+            <td>BF51</td>
+            <td>WA</td>
+            <td>Washtenaw</td>
+            <td>0</td>
+            <td>DCAC</td>
+        </tr>
+        <tr>
+            <td>FD9B</td>
+            <td>DCAC</td>
+            <td>YP</td>
+            <td>Ypsilanti</td>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>4</td>
+            <td>FD9B</td>
+        </tr>
+        <tr>
+            <td>FD9B</td>
+            <td>DCAC</td>
+            <td>YP</td>
+            <td>Ypsilanti</td>
+            <td>88BB</td>
+            <td>26A5</td>
+            <td>MW</td>
+            <td>Midwest</td>
+            <td>3</td>
+            <td>FD9B</td>
+        </tr>
+        <tr>
+            <td>FD9B</td>
+            <td>DCAC</td>
+            <td>YP</td>
+            <td>Ypsilanti</td>
+            <td>BF51</td>
+            <td>88BB</td>
+            <td>MI</td>
+            <td>Michigan</td>
+            <td>2</td>
+            <td>FD9B</td>
+        </tr>
+        <tr>
+            <td>FD9B</td>
+            <td>DCAC</td>
+            <td>YP</td>
+            <td>Ypsilanti</td>
+            <td>DCAC</td>
+            <td>BF51</td>
+            <td>WA</td>
+            <td>Washtenaw</td>
+            <td>1</td>
+            <td>FD9B</td>
+        </tr>
+        <tr>
+            <td>FD9B</td>
+            <td>DCAC</td>
+            <td>YP</td>
+            <td>Ypsilanti</td>
+            <td>FD9B</td>
+            <td>DCAC</td>
+            <td>YP</td>
+            <td>Ypsilanti</td>
+            <td>0</td>
+            <td>FD9B</td>
+        </tr>
+        <tr>
+            <td>18F8</td>
+            <td>FACC</td>
+            <td>DE</td>
+            <td>Detroit</td>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>4</td>
+            <td>18F8</td>
+        </tr>
+        <tr>
+            <td>18F8</td>
+            <td>FACC</td>
+            <td>DE</td>
+            <td>Detroit</td>
+            <td>88BB</td>
+            <td>26A5</td>
+            <td>MW</td>
+            <td>Midwest</td>
+            <td>3</td>
+            <td>18F8</td>
+        </tr>
+        <tr>
+            <td>18F8</td>
+            <td>FACC</td>
+            <td>DE</td>
+            <td>Detroit</td>
+            <td>BF51</td>
+            <td>88BB</td>
+            <td>MI</td>
+            <td>Michigan</td>
+            <td>2</td>
+            <td>18F8</td>
+        </tr>
+        <tr>
+            <td>18F8</td>
+            <td>FACC</td>
+            <td>DE</td>
+            <td>Detroit</td>
+            <td>FACC</td>
+            <td>BF51</td>
+            <td>WC</td>
+            <td>Wayne</td>
+            <td>1</td>
+            <td>18F8</td>
+        </tr>
+        <tr>
+            <td>18F8</td>
+            <td>FACC</td>
+            <td>DE</td>
+            <td>Detroit</td>
+            <td>18F8</td>
+            <td>FACC</td>
+            <td>DE</td>
+            <td>Detroit</td>
+            <td>0</td>
+            <td>18F8</td>
+        </tr>
+        <tr>
+            <td>88BB</td>
+            <td>26A5</td>
+            <td>MW</td>
+            <td>Midwest</td>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>1</td>
+            <td>88BB</td>
+        </tr>
+        <tr>
+            <td>88BB</td>
+            <td>26A5</td>
+            <td>MW</td>
+            <td>Midwest</td>
+            <td>88BB</td>
+            <td>26A5</td>
+            <td>MW</td>
+            <td>Midwest</td>
+            <td>0</td>
+            <td>88BB</td>
+        </tr>
+        <tr>
+            <td>947A</td>
+            <td>BB56</td>
+            <td>UM</td>
+            <td>University of Michigan</td>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>5</td>
+            <td>947A</td>
+        </tr>
+        <tr>
+            <td>947A</td>
+            <td>BB56</td>
+            <td>UM</td>
+            <td>University of Michigan</td>
+            <td>88BB</td>
+            <td>26A5</td>
+            <td>MW</td>
+            <td>Midwest</td>
+            <td>4</td>
+            <td>947A</td>
+        </tr>
+        <tr>
+            <td>947A</td>
+            <td>BB56</td>
+            <td>UM</td>
+            <td>University of Michigan</td>
+            <td>BF51</td>
+            <td>88BB</td>
+            <td>MI</td>
+            <td>Michigan</td>
+            <td>3</td>
+            <td>947A</td>
+        </tr>
+        <tr>
+            <td>947A</td>
+            <td>BB56</td>
+            <td>UM</td>
+            <td>University of Michigan</td>
+            <td>DCAC</td>
+            <td>BF51</td>
+            <td>WA</td>
+            <td>Washtenaw</td>
+            <td>2</td>
+            <td>947A</td>
+        </tr>
+        <tr>
+            <td>947A</td>
+            <td>BB56</td>
+            <td>UM</td>
+            <td>University of Michigan</td>
+            <td>BB56</td>
+            <td>DCAC</td>
+            <td>AA</td>
+            <td>Ann Arbor</td>
+            <td>1</td>
+            <td>947A</td>
+        </tr>
+        <tr>
+            <td>947A</td>
+            <td>BB56</td>
+            <td>UM</td>
+            <td>University of Michigan</td>
+            <td>947A</td>
+            <td>BB56</td>
+            <td>UM</td>
+            <td>University of Michigan</td>
+            <td>0</td>
+            <td>947A</td>
+        </tr>
+        <tr>
+            <td>AB85</td>
+            <td>26A5</td>
+            <td>NW</td>
+            <td>Northwest</td>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>1</td>
+            <td>AB85</td>
+        </tr>
+        <tr>
+            <td>AB85</td>
+            <td>26A5</td>
+            <td>NW</td>
+            <td>Northwest</td>
+            <td>AB85</td>
+            <td>26A5</td>
+            <td>NW</td>
+            <td>Northwest</td>
+            <td>0</td>
+            <td>AB85</td>
+        </tr>
+        <tr>
+            <td>24D5</td>
+            <td>FACC</td>
+            <td>CA</td>
+            <td>Canton</td>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>4</td>
+            <td>24D5</td>
+        </tr>
+        <tr>
+            <td>24D5</td>
+            <td>FACC</td>
+            <td>CA</td>
+            <td>Canton</td>
+            <td>88BB</td>
+            <td>26A5</td>
+            <td>MW</td>
+            <td>Midwest</td>
+            <td>3</td>
+            <td>24D5</td>
+        </tr>
+        <tr>
+            <td>24D5</td>
+            <td>FACC</td>
+            <td>CA</td>
+            <td>Canton</td>
+            <td>BF51</td>
+            <td>88BB</td>
+            <td>MI</td>
+            <td>Michigan</td>
+            <td>2</td>
+            <td>24D5</td>
+        </tr>
+        <tr>
+            <td>24D5</td>
+            <td>FACC</td>
+            <td>CA</td>
+            <td>Canton</td>
+            <td>FACC</td>
+            <td>BF51</td>
+            <td>WC</td>
+            <td>Wayne</td>
+            <td>1</td>
+            <td>24D5</td>
+        </tr>
+        <tr>
+            <td>24D5</td>
+            <td>FACC</td>
+            <td>CA</td>
+            <td>Canton</td>
+            <td>24D5</td>
+            <td>FACC</td>
+            <td>CA</td>
+            <td>Canton</td>
+            <td>0</td>
+            <td>24D5</td>
+        </tr>
+        <tr>
+            <td>B338</td>
+            <td>88BB</td>
+            <td>IN</td>
+            <td>Indiana</td>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>2</td>
+            <td>B338</td>
+        </tr>
+        <tr>
+            <td>B338</td>
+            <td>88BB</td>
+            <td>IN</td>
+            <td>Indiana</td>
+            <td>88BB</td>
+            <td>26A5</td>
+            <td>MW</td>
+            <td>Midwest</td>
+            <td>1</td>
+            <td>B338</td>
+        </tr>
+        <tr>
+            <td>B338</td>
+            <td>88BB</td>
+            <td>IN</td>
+            <td>Indiana</td>
+            <td>B338</td>
+            <td>88BB</td>
+            <td>IN</td>
+            <td>Indiana</td>
+            <td>0</td>
+            <td>B338</td>
+        </tr>
+        <tr>
+            <td>F352</td>
+            <td>FD9B</td>
+            <td>EMU</td>
+            <td>Eastern Michigan University</td>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>5</td>
+            <td>F352</td>
+        </tr>
+        <tr>
+            <td>F352</td>
+            <td>FD9B</td>
+            <td>EMU</td>
+            <td>Eastern Michigan University</td>
+            <td>88BB</td>
+            <td>26A5</td>
+            <td>MW</td>
+            <td>Midwest</td>
+            <td>4</td>
+            <td>F352</td>
+        </tr>
+        <tr>
+            <td>F352</td>
+            <td>FD9B</td>
+            <td>EMU</td>
+            <td>Eastern Michigan University</td>
+            <td>BF51</td>
+            <td>88BB</td>
+            <td>MI</td>
+            <td>Michigan</td>
+            <td>3</td>
+            <td>F352</td>
+        </tr>
+        <tr>
+            <td>F352</td>
+            <td>FD9B</td>
+            <td>EMU</td>
+            <td>Eastern Michigan University</td>
+            <td>DCAC</td>
+            <td>BF51</td>
+            <td>WA</td>
+            <td>Washtenaw</td>
+            <td>2</td>
+            <td>F352</td>
+        </tr>
+        <tr>
+            <td>F352</td>
+            <td>FD9B</td>
+            <td>EMU</td>
+            <td>Eastern Michigan University</td>
+            <td>FD9B</td>
+            <td>DCAC</td>
+            <td>YP</td>
+            <td>Ypsilanti</td>
+            <td>1</td>
+            <td>F352</td>
+        </tr>
+        <tr>
+            <td>F352</td>
+            <td>FD9B</td>
+            <td>EMU</td>
+            <td>Eastern Michigan University</td>
+            <td>F352</td>
+            <td>FD9B</td>
+            <td>EMU</td>
+            <td>Eastern Michigan University</td>
+            <td>0</td>
+            <td>F352</td>
+        </tr>
+        <tr>
+            <td>4EE6</td>
+            <td>26A5</td>
+            <td>SE</td>
+            <td>Southeast</td>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>1</td>
+            <td>4EE6</td>
+        </tr>
+        <tr>
+            <td>4EE6</td>
+            <td>26A5</td>
+            <td>SE</td>
+            <td>Southeast</td>
+            <td>4EE6</td>
+            <td>26A5</td>
+            <td>SE</td>
+            <td>Southeast</td>
+            <td>0</td>
+            <td>4EE6</td>
+        </tr>
+        <tr>
+            <td>FCFC</td>
+            <td>88BB</td>
+            <td>OH</td>
+            <td>Ohio</td>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>2</td>
+            <td>FCFC</td>
+        </tr>
+        <tr>
+            <td>FCFC</td>
+            <td>88BB</td>
+            <td>OH</td>
+            <td>Ohio</td>
+            <td>88BB</td>
+            <td>26A5</td>
+            <td>MW</td>
+            <td>Midwest</td>
+            <td>1</td>
+            <td>FCFC</td>
+        </tr>
+        <tr>
+            <td>FCFC</td>
+            <td>88BB</td>
+            <td>OH</td>
+            <td>Ohio</td>
+            <td>FCFC</td>
+            <td>88BB</td>
+            <td>OH</td>
+            <td>Ohio</td>
+            <td>0</td>
+            <td>FCFC</td>
+        </tr>
+        <tr>
+            <td>22E8</td>
+            <td>26A5</td>
+            <td>NE</td>
+            <td>Northeast</td>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>1</td>
+            <td>22E8</td>
+        </tr>
+        <tr>
+            <td>22E8</td>
+            <td>26A5</td>
+            <td>NE</td>
+            <td>Northeast</td>
+            <td>22E8</td>
+            <td>26A5</td>
+            <td>NE</td>
+            <td>Northeast</td>
+            <td>0</td>
+            <td>22E8</td>
+        </tr>
+        <tr>
+            <td>BB56</td>
+            <td>DCAC</td>
+            <td>AA</td>
+            <td>Ann Arbor</td>
+            <td>26A5</td>
+            <td>NULL</td>
+            <td>US</td>
+            <td>United States</td>
+            <td>4</td>
+            <td>BB56</td>
+        </tr>
+        <tr>
+            <td>BB56</td>
+            <td>DCAC</td>
+            <td>AA</td>
+            <td>Ann Arbor</td>
+            <td>88BB</td>
+            <td>26A5</td>
+            <td>MW</td>
+            <td>Midwest</td>
+            <td>3</td>
+            <td>BB56</td>
+        </tr>
+        <tr>
+            <td>BB56</td>
+            <td>DCAC</td>
+            <td>AA</td>
+            <td>Ann Arbor</td>
+            <td>BF51</td>
+            <td>88BB</td>
+            <td>MI</td>
+            <td>Michigan</td>
+            <td>2</td>
+            <td>BB56</td>
+        </tr>
+        <tr>
+            <td>BB56</td>
+            <td>DCAC</td>
+            <td>AA</td>
+            <td>Ann Arbor</td>
+            <td>DCAC</td>
+            <td>BF51</td>
+            <td>WA</td>
+            <td>Washtenaw</td>
+            <td>1</td>
+            <td>BB56</td>
+        </tr>
+        <tr>
+            <td>BB56</td>
+            <td>DCAC</td>
+            <td>AA</td>
+            <td>Ann Arbor</td>
+            <td>BB56</td>
+            <td>DCAC</td>
+            <td>AA</td>
+            <td>Ann Arbor</td>
+            <td>0</td>
+            <td>BB56</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>The custom helper is supplied as a parameter to the PetaPoco Multi Fetch call:</p>
+
+<script src="https://gist.github.com/tawman/b02c543fad69ddfb48772a01457d51cb.js"></script>
+
+<p>The repository query is structured such that each resulting row of data contains an Organization (T1) and Parent Organization
+    (T2). The query will return multiple rows for the same Organization equal to its depth in the hierarchy. The rows are
+    sorted by Organization Hierarchy Level in descending order.</p>
+
+<p>The
+    <em>OrganizationParentRelator.BuildHierarchy(organization, parent)</em> helper method will push the parent organization upward
+    as each Organization row is processed and then return the hierarchical representation of the Organization (TRet) when
+    no more parents are present:</p>
+<p>
+<script src="https://gist.github.com/1721109.js"></script>
+</p>
+<h4>Resulting Organization Structure Displayed Online</h4>
+<p>
+    <img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: inline; border-top-width: 0px; border-bottom-width: 0px; border-left-width: 0px; padding-top: 0px"
+        title="WebPageView" border="0" alt="WebPageView" src="/assets/images//WebPageView.png" width="630" height="492">
+</p>
+
+<h3>Conclusion</h3>
+<p>I hope you found this blog post helpful and be sure to check out the full source code on
+    <a href="https://github.com/tawman/PetaPocoHierarchy"
+        target="_blank">GitHub: tawman / PetaPocoHierarchy</a>. The PetaPoco project page over on
+    <a href="http://www.toptensoftware.com/petapoco/"
+        target="_blank">Topten Software</a> has more examples under the blog posts sections for using the Multi-Poco Mapping feature in other
+    ways.</p>

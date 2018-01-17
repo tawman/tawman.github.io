@@ -1,0 +1,32 @@
+---
+layout: single
+title:  "PowerShell Object Pipeline"
+date:   2012-04-15 00:00:00 -0600
+categories: PowerShell
+tags: PowerShell
+permalink: /:year/:month/:title/
+---
+
+<p>On .NET projects today, a common theme with setup and builds scripts is
+    <a href="https://github.com/psake/psake" target="_blank">
+        <em>psake</em>
+    </a> and
+    <a href="http://technet.microsoft.com/en-us/dd793612" target="_blank">Windows PowerShell</a>. A development team member on my current project is a PowerShell Ninja, which prompted me to learn
+    more about PowerShell this weekend. I watched an excellent five-part webcast series by Ed Wilson (
+    <a href="https://twitter.com/#!/ScriptingGuys" target="_blank">@ScriptingGuys</a>) on
+    <a href="http://technet.microsoft.com/en-us/scriptcenter/dd742419" target="_blank">Scripting with Windows PowerShell</a> that got me up to speed in a couple hours.</p>
+<p>These webcasts changed my viewpoint of PowerShell from being a VBScript replacement (that I never used) to a powerful scripting
+    framework and shell. I have modified and extended existing
+    <em>psake</em> build scripts, but I did not realize some of the key concepts lurking just below the surface.</p>
+<p>I did not consider it possible that PowerShell pipelines objects between commands instead of strings due to the many years
+    I spent developing shell scripts on UNIX/Linux. Once Ed explained this key concept, I discarded my preconceived understanding
+    of PowerShell and watched the entire series to learn more.</p>
+<p>I can only imagine how useful object pipelining in UNIX shell scripts would be after witnessing the equivalent in PowerShell.
+    For example, getting basic process information from the bash prompt on the Mac can be done with the
+    <em>ps</em> command. The output of the
+    <em>ps</em> command can be manipulated as standard ASCII text:</p>
+<script src="https://gist.github.com/2394435.js?file=BashShell.txt"></script>
+<p>Conversely, the same process information in PowerShell passes along the entire process object to the next command to inspect:</p>
+<script src="https://gist.github.com/2394445.js?file=PowerShell.txt"></script>
+<p>Object passing between commands in PowerShell is just a minor fact hardly worth blogging about, but it is a fundamental reason
+    you should ignore decades of preconceived ideas about shell scripting and give PowerShell an honest look.</p>

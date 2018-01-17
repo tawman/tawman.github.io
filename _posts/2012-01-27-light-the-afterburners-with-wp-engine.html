@@ -1,0 +1,129 @@
+---
+layout: single
+title:  "Light the Afterburners with WP Engine"
+date:   2012-01-27 00:00:00 -0600
+categories: Azure
+tags:
+- Azure
+- Parallels
+- WP Engine
+permalink: /:year/:month/:title/
+---
+<p>
+<a href="http://wpengine.com"><img style="background-image: none; margin: 0px 0px 0px 20px; padding-left: 0px; padding-right: 0px; display: inline; float: right; padding-top: 0px; border-width: 0px;" title="wpe-banner-125x125" src="/assets/images/wpe-banner-125x125.jpg" alt="wpe-banner-125x125" width="129" height="129" align="right" border="0" /></a>
+TL; DR – You will enjoy rolling your own <a href="http://wordpress.org/download/" target="_blank">WordPress</a>
+instance on <a href="https://www.windowsazure.com/en-us/" target="_blank">Azure</a> until you
+see the cost of scaling and maintaining the site. I decided to spend more time blogging and
+less time and money managing the infrastructure by leaving the speed, scale, security, and
+support of a fully managed <em>WordPress</em> installation to Austin&apos;s very own
+<a href="http://wpengine.com/" target="_blank">WP Engine</a>.
+</p>
+<h2>Turbulence</h2>
+<p>
+It did not take long before I hit my first patch of turbulence in the
+<a href="https://www.windowsazure.com/en-us/" target="_blank">Windows Azure Cloud</a>. My
+second blog post about using <a href="http://www.woodcp.com/2012/01/heterogeneous-development-environment-with-parallels-desktop-7-for-mac/" target="_blank">Parallels Desktop® 7 for Mac</a>
+for a development machine was retweeted by <a href="https://twitter.com/#!/parallelsmac" target="_blank">@ParallelsMac</a>
+to its 18K+ followers. I checked my blog entry for any comments, but was greeted by the
+message: <strong>Error establishing a database connection</strong>.
+</p>
+<h2>The Cathedral and the Bazaar in the Sky</h2>
+<p>
+<img style="background-image: none; padding-left: 0px; padding-right: 20px; display: inline; float: left; padding-top: 0px; border-width: 0px;" title="Windows Azure" src="/assets/images/Azure.png" alt="Windows Azure" width="207" height="175" align="left" border="0" />
+I had <em>WordPress 3.3.1</em> configured to run on two Extra Small Azure server instances
+(Shared CPU Cores and 768 MB Memory) with a <em>SQL Azure</em> backend. I figured this
+configuration would suffice for a single blog site with no following.
+</p>
+<p>
+The first action I took during the outage was to start up an additional two instances via the
+web management interface. This immediately resolved the issue, but I assumed the traffic that
+caused it was long gone and never to return. Since I was only 3 days into my 90 day free trial
+of Azure, there was no cost for spinning up additional instances. However, projecting the cost
+forward under normal conditions after the trial period gave me cause for concern.
+</p>
+<h3>Cloud with a Silver Lining</h3>
+<p>
+Windows Azure is quite up front about its pricing levels and provides an excellent
+<a href="https://www.windowsazure.com/en-us/pricing/calculator/" target="_blank">Pricing Calculator</a>
+to check out the cost of various configurations. It took me several days, but I finally
+spotted the <em>Billing</em> link on my management portal page. I checked today to see the
+net effect of running five Extra Small Azure instances the past couple days. The 6 days worth
+of statistics made it clear I would not be needing the full 90 day <em>free</em> trial period:
+<ul>
+  <li>Database (DB / Month) – Web Edition: 19.355% of 1 db/month</li>
+  <li>Compute Hours –   Windows Azure Compute: 17.2% of 750 Unit</li>
+  <li>Storage Transactions (in 10,000s) – Windows Azure Storage: 3.112% of 5 10,000s</li>
+  <li>liData Transfer Out: 0.17 GB of 80GB</li>
+  <li>Data Transfer In: 0.39 GB<GB/li>
+</ul>
+</p>
+<p>
+The free trial period includes 750 hours of compute time per month, but that is only enough
+for a single Extra Small instance. The recommended configuration by Azure is two instances
+and that was not even enough for my small burst of traffic.
+</p>
+<h3>Seeding Your Own Cloud</h3>
+<p>
+I thoroughly enjoyed rolling my own instance of <em>WordPress</em> in the Azure cloud, but the
+price of scaling it is too much for the average blogger. Change management of the
+<em>WordPress</em> site is not as straight forward either when running your own cloud. I found
+this out quickly when using the <em>WordPress</em> administration interface.
+</p>
+<p>
+I knew from the start that running multiple instances would isolate certain aspects of the
+framework but not by how much. The <a href="https://github.com/Interop-Bridges/Windows-Azure-PHP-Scaffolders" target="_blank">Windows-Azure-PHP-Scaffolders</a> included a Windows Azure Storage plug-in to make images and static content available across all instances. In addition, the <em>WordPress</em> database will keep your content and plug-in settings available for all instances. The problem is with the other items that you frequently change when first setting up a new <em>WordPress</em>
+site:
+<ul>
+  <li>Plugins – You cannot install or uninstall plugins using the online admin interface unless you understand the fine art of round robin load balance dancing (F5 or Command-R) to install them on all nodes</li>
+  <li>Themes – You cannot install or modify themes using the online admin interface without the same issue</li>
+  <li>You could install the certificates to Remote Desktop into the instances, but Azure will use the base image uploaded when starting up any new instances. All component and template changes will be lost on the new instance.</li>
+</ul>
+</p>
+<p>
+The remedy is to configure the <em>WordPress</em> plugins and theme modifications on your local
+computer, repackage the changes into a new Azure deployment, and use the Azure management
+console to stage the upgrade into the Cloud. Azure makes the process quite simple for someone
+like myself, but it is more complicated than simply using the WP-Admin interface to make the
+changes online.
+</p>
+<h2>The Specialists</h2>
+<p>
+Reliability and performance is rarely free or inexpensive, so I went back to where I started 6
+days ago looking for hosted <em>WordPress</em> providers. I had no interest in the standard web
+hosting shared / VPS offerings thereby limiting my search to true SaaS providers like
+<a href="https://en.wordpress.com/signup/">WordPress.com</a> and
+<a href="http://wpengine.com">WP Engine</a>. After seeing the cost of Azure, I did not even
+bother with exploring Amazon AWS.
+</p>
+<h3>WordPress .COM</h3>
+<p>
+My new review of <em>WordPress.com</em> left me with the same concerns as before. It needs to
+control your DNS zone file, only short form domain name URL, and from what I read you cannot
+use any plugin that generates / uses javascript. There was some confusing verbiage on ads and
+I am not looking to run ads on my blog no matter how much I mention the products I use and
+find value.
+</p>
+<h3>WP Engine</h3>
+<p>
+<a href="http://wpengine.com/"><img style="background-image: none; margin: 0px 0px 0px 20px; padding-left: 0px; padding-right: 0px; display: inline; float: right; padding-top: 0px; border-width: 0px;" title="engine" src="http://www.woodcp.com/wp-content/uploads/2012/01/engine.png" alt="engine" width="244" height="244" align="right" border="0" /></a>WP Engine on the other hand, provides exactly what I was attempting to accomplish on my own, but without the change management opportunity and scaling costs. I also like the idea of supporting a <a href="http://wpengine.com/about/">locally operated Austin business</a>.
+If I am not mistaken, I only know of WP Engine by word of mouth of them either sponsoring or
+helping out at some Austin technical user group meeting or something. This just goes to prove
+that more tech companies should be sponsoring local tech user groups with beer and food.
+</p>
+<p>
+The best part, it literally only took me 43 minutes from the time I received the
+<em>Welcome to WP Engine!</em> email until the moment I logged into
+<a href="http://www.namecheap.com/">Namecheap.com</a> to update my DNS settings to point my
+CNAME record directly to WP Engine.
+</p>
+<h2>Closing Thought</h2>
+<p>
+In the end, Azure is fun but WP Engine will get it done. I enjoyed the experience of
+understanding the finer points of packaging and deploying to Azure, but I am not willing to
+spend the dollars necessary to operate successfully on it. Stay tuned, I have only been on WP
+Engine for 5 hours now.
+</p>
+<h2>References</h2>
+<ul>
+  <li>Eric S. Raymond (1999). <a class="external text" href="http://www.catb.org/~esr/writings/cathedral-bazaar/cathedral-bazaar/" rel="nofollow"><em>The Cathedral &amp; the Bazaar</em></a>. O&apos;Reilly. ISBN 1-56592-724-9</li>
+</ul>

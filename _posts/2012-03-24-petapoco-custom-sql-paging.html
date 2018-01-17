@@ -1,0 +1,48 @@
+---
+layout: single
+title:  "PetaPoco Custom SQL Paging"
+date:   2012-03-24 00:00:00 -0600
+categories: PetaPoco
+tags: PetaPoco
+permalink: /:year/:month/:title/
+---
+<p>
+    I blogged previously about
+    <a href="http://www.woodcp.com/2012/02/server-side-paging-with-petapoco-and-datatables/" target="_blank">Server-Side Paging with PetaPoco and DataTables</a>, which works well for about 80% of the SQL statements that require
+    server-side paging. In fact, I already submitted a
+    <a href="https://github.com/toptensoftware/PetaPoco/pull/94" target="_blank">pull request</a> in December 2011 to modify the
+    <em>rxOrderBy</em> Regex used by
+    <a href="http://www.toptensoftware.com/petapoco/" target="_blank">PetaPoco</a> during
+    <em>Page&lt;T&gt;</em> query rewrite to support sub-select ordering containing
+    <em>ROW_NUMBER() PARTITION BY</em>.</p>
+<p>The latest query from the 20% unsupported category prompted my
+    <a href="https://github.com/toptensoftware/PetaPoco/pull/104"
+        target="_blank">pull request</a> to bypass the PetaPoco query rewrite logic entirely and allow the caller to provide the
+    <em>count</em> and
+    <em>paging</em> queries. After all, PetaPoco is a single-file micro-ORM that expects the user to understand SQL already.
+    The secret sauce covers the low friction data access layer between the database and your POCOs, and not the SQL itself.</p>
+<p>Currently, PetaPoco supports server-side paging with the following
+    <em>Page&lt;T&gt;</em> method overloads that generate
+    <em>count</em> and
+    <em>page</em> results queries from a single SQL statement:</p>
+<ul>
+    <li>
+        <font face="Consolas">public Page&lt;T&gt; Page&lt;T&gt;(long page, long itemsPerPage, Sql sql)</font>
+        <li>
+            <font face="Consolas">public Page&lt;T&gt; Page&lt;T&gt;(long page, long itemsPerPage, string sql, params object[] args)</font>
+        </li>
+</ul>
+<p>My
+    <a href="https://github.com/toptensoftware/PetaPoco/pull/104" target="_blank">pull request</a> simply adds another
+    <em>Page&lt;T&gt;</em> method overload that accepts the two SQL statements to use for the count and page results without
+    calling the
+    <em>BuildPageQueries&lt;T&gt;</em> method:
+    <font face="Consolas">public Page&lt;T&gt; Page&lt;T&gt;(long page, long itemsPerPage, Sql sqlCount, Sql sqlPage)</font>
+</p>
+<p>The following gist provides a sample set of queries using the new Page&lt;T&gt; overload:</p>
+<div>
+    <script src="https://gist.github.com/2126002.js?file=SamplePetaPocoPageCustomSql.cs"></script>
+</div>
+<p>There has not been much activity in the
+    <a href="https://github.com/toptensoftware/PetaPoco" target="_blank">PetaPoco GitHub repository</a> in over 8 months, so you might want to pull this change into your own fork if faced with
+    similar server-side paging requirements. </p>
