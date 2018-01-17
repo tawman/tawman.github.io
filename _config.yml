@@ -13,7 +13,7 @@ title                    : "Implement IToddWood"
 title_separator          : "-"
 name                     : "Todd A. Wood"
 description              : "Technology Blog for Todd A. Wood, Solution Architect and Owner of Wood Consulting Practice, LLC."
-url                      : "https://tawman.github.io" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
+url                      : "http://www.woodcp.com" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : # the subpath of your site, e.g. "/blog"
 repository               : "tawman/tawman.github.io" # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
 teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
@@ -77,9 +77,9 @@ social:
 
 # Analytics
 analytics:
-  provider               : false # false (default), "google", "google-universal", "custom"
+  provider               : "google" # false (default), "google", "google-universal", "custom"
   google:
-    tracking_id          :
+    tracking_id          : "UA-28493349-1"
 
 
 # Site Author
@@ -89,8 +89,8 @@ author:
   bio              : "Chief Software Architect for Silencer Shop"
   location         : "Austin, Texas, USA"
   email            :
-  uri              : "https://tawman.github.io"
-  home             : "https://tawman.github.io" # null (default), "absolute or relative url to link to author home"
+  uri              : "http://www.woodcp.com"
+  home             : "http://www.woodcp.com" # null (default), "absolute or relative url to link to author home"
   bitbucket        :
   codepen          :
   dribbble         :
