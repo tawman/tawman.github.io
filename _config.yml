@@ -12,7 +12,7 @@ locale                   : "en-US"
 title                    : "Implement IToddWood"
 title_separator          : "-"
 name                     : "Todd A. Wood"
-description              : "Technology Blog for Todd A. Wood, Solution Architect and Owner of Wood Consulting Practice, LLC."
+description              : "Technology Blog for Todd A. Wood, Chief Technology Officer for Silencer Shop, and Solution Architect / Owner of Wood Consulting Practice, LLC."
 url                      : "http://www.woodcp.com" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : # the subpath of your site, e.g. "/blog"
 repository               : "tawman/tawman.github.io" # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
@@ -86,7 +86,7 @@ analytics:
 author:
   name             : "Todd A. Wood"
   avatar           : "/assets/images/ToddWood.png" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "Chief Software Architect for Silencer Shop"
+  bio              : "Chief Technology Officer for Silencer Shop"
   location         : "Austin, Texas, USA"
   email            :
   uri              : "http://www.woodcp.com"
