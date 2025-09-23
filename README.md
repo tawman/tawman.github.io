@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace WoodConsultingPractice
+namespace WoodConsultingPartners
 {
     public interface IToddWood
     {
@@ -15,7 +15,7 @@ namespace WoodConsultingPractice
 }
 ```
 
-Todd A. Wood is a critical thinking IT professional with over 25 years experience conceptualizing, leading, and implementing database-centric technology solutions to support key business processes. A professional possessing extensive international and cross industry experience capable of applying this knowledge for the benefit of each customer and stakeholder. A leader experienced in all stages of the software development life cycle including requirements definition, design, architecture, testing, and support.
+Todd A. Wood is a critical thinking IT professional with over 30 years experience conceptualizing, leading, and implementing database-centric technology solutions to support key business processes. A professional possessing extensive international and cross industry experience capable of applying this knowledge for the benefit of each customer and stakeholder. A leader experienced in all stages of the software development life cycle including requirements definition, design, architecture, testing, and support.
 
 ## Areas of Expertise:
   * Business Requirements Analysis
