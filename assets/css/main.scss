@@ -6,3 +6,202 @@
 
 @import "minimal-mistakes/skins/{{ site.minimal_mistakes_skin | default: 'default' }}"; // skin
 @import "minimal-mistakes"; // main partials
+
+// Custom styles for bold modern consulting look
+
+// Hero section enhancements
+.page__hero--overlay {
+  padding: 2em 0;
+
+  @media (min-width: 64em) {
+    padding: 4em 0;
+  }
+
+  .page__title {
+    font-size: 2.2em;
+    font-weight: 700;
+    text-align: center;
+
+    @media (min-width: 64em) {
+      font-size: 3.5em;
+    }
+  }
+
+  .page__lead {
+    font-size: 1.2em;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+
+    @media (min-width: 64em) {
+      font-size: 1.5em;
+    }
+
+  }
+
+  .page__tagline {
+    font-size: 1.4em;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    margin-top: 1em;
+    white-space: nowrap;
+    text-align: center;
+    color: #fff;
+
+    @media (min-width: 64em) {
+      font-size: 1.6em;
+    }
+  }
+
+  .btn--primary {
+    font-size: 1em;
+    padding: 0.75em 1.5em;
+  }
+}
+
+// Feature row (service cards) - Bootstrap card style
+.feature__wrapper {
+  margin-top: 2em;
+  margin-bottom: 2em;
+  border-bottom: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5em;
+}
+
+.feature__item {
+  flex: 1 1 300px;
+  max-width: 350px;
+  display: flex;
+  text-align: center;
+  margin-bottom: 0;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.25em 1em;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  }
+
+  .archive__item {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+  }
+
+  .archive__item-teaser {
+    margin-bottom: 1em;
+  }
+
+  .archive__item-title {
+    font-size: 1.4em;
+    margin-bottom: 0.75em;
+    color: #222;
+  }
+
+  .archive__item-body {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .archive__item-excerpt {
+    font-size: 0.95em;
+    line-height: 1.6;
+    flex-grow: 1;
+  }
+
+  // Button container - push to bottom
+  .archive__item-body > p:last-child {
+    margin-top: auto;
+    margin-bottom: 0;
+    padding-top: 1em;
+  }
+}
+
+// Button enhancements
+.btn--primary {
+  border-radius: 4px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+}
+
+.btn--inverse {
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.btn--large {
+  padding: 0.75em 1.5em;
+}
+
+// Page content styling
+.page__content {
+  h2 {
+    margin-top: 2em;
+    padding-bottom: 0.5em;
+    border-bottom: 2px solid $primary-color;
+  }
+
+  ul {
+    margin-left: 1em;
+  }
+
+  li {
+    margin-bottom: 0.5em;
+  }
+}
+
+// Services page styling
+section {
+  margin-bottom: 2em;
+
+  h2 {
+    color: $primary-color;
+  }
+
+  h3 {
+    margin-top: 1.5em;
+    font-size: 1.1em;
+  }
+}
+
+// Lead paragraph styling
+.page__lead {
+  font-size: 1.2em;
+  color: $muted-text-color;
+  margin-bottom: 2em;
+}
+
+// Masthead enhancements for bold look
+.masthead {
+  border-bottom: 2px solid $primary-color;
+
+  &__inner-wrap {
+    margin-left: 2%;
+    margin-right: 2%;
+  }
+}
+
+.greedy-nav a.site-title {
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+}
+
+.site-logo {
+  height: 40px;
+  width: auto;
+  margin-right: 0.5em;
+}

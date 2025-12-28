@@ -45,6 +45,9 @@
       {% if page.header.show_overlay_excerpt != false and page.excerpt %}
         <p class="page__lead">{{ page.excerpt | markdownify | remove: "<p>" | remove: "</p>" }}</p>
       {% endif %}
+      {% if page.header.tagline %}
+        <p class="page__tagline">{{ page.header.tagline | markdownify | remove: "<p>" | remove: "</p>" }}</p>
+      {% endif %}
       {% if site.read_time and page.read_time %}
         <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> {% include read-time.html %}</p>
       {% endif %}

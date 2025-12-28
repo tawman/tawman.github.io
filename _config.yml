@@ -5,14 +5,14 @@
 # For technical reasons, this file is *NOT* reloaded automatically when you use
 # `jekyll serve`. If you change this file, please restart the server process.
 
-minimal_mistakes_skin    : "default" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
+minimal_mistakes_skin    : "contrast" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
 
 # Site Settings
 locale                   : "en-US"
-title                    : "Implement IToddWood"
+title                    : "Wood Consulting Partners"
 title_separator          : "-"
 name                     : "Todd A. Wood"
-description              : "Technology Blog for Todd A. Wood; Solution Architect / Owner of Wood Consulting Partners, LLC."
+description              : "Expert technology consulting, solution architecture, and custom development services"
 url                      : "https://www.woodcp.com" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : # the subpath of your site, e.g. "/blog"
 repository               : "tawman/tawman.github.io" # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
@@ -85,8 +85,8 @@ analytics:
 # Site Author
 author:
   name             : "Todd A. Wood"
-  avatar           : "/assets/images/ToddWood.png" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "Technology Expert"
+  avatar           : "/assets/images/ToddWood.jpg" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
+  bio              : "Technology Consulting & Solution Architecture"
   location         : "Austin, Texas, USA"
   email            :
   uri              : "https://www.woodcp.com"
