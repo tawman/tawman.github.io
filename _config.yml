@@ -5,6 +5,8 @@
 # For technical reasons, this file is *NOT* reloaded automatically when you use
 # `jekyll serve`. If you change this file, please restart the server process.
 
+# theme                  : minimal-mistakes-jekyll  # uncomment for local dev, comment out remote_theme
+remote_theme             : "mmistakes/minimal-mistakes"
 minimal_mistakes_skin    : "contrast" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
 
 # Site Settings
@@ -192,6 +194,8 @@ plugins:
   - jekyll-sitemap
   - jekyll-gist
   - jekyll-feed
+  - jekyll-include-cache
+  - jekyll-remote-theme
   - jemoji
 
 # mimic GitHub Pages with --safe
@@ -200,6 +204,8 @@ whitelist:
   - jekyll-sitemap
   - jekyll-gist
   - jekyll-feed
+  - jekyll-include-cache
+  - jekyll-remote-theme
   - jemoji
 
 

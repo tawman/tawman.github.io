@@ -16,3 +16,5 @@ node_modules
 npm-debug.log*
 .claude/
 CLAUDE.md
+.idea/
+_config.dev.yml

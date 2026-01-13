@@ -1,0 +1,16 @@
+services:
+  jekyll:
+    image: jekyll/jekyll:4
+    container_name: woodcp-jekyll
+    ports:
+      - "4000:4000"
+      - "35729:35729"
+    volumes:
+      - .:/srv/jekyll:rw
+      - jekyll_bundles:/usr/local/bundle
+    environment:
+      - JEKYLL_ENV=development
+    command: bash -c "rm -f Gemfile.lock && bundle install && bundle exec jekyll serve --config _config.yml,_config.dev.yml --host 0.0.0.0 --livereload --force_polling --incremental"
+
+volumes:
+  jekyll_bundles:
