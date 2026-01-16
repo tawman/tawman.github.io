@@ -4,6 +4,8 @@ main:
     url: /
   - title: "Services"
     url: /services/
+  - title: "Ventures"
+    url: /ventures/
   - title: "About"
     url: /about/
   - title: "Insights"

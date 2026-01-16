@@ -1,0 +1,28 @@
+# Venture Studio Portfolio
+# Add new products by copying this structure
+
+- name: OfficialsBooks
+  url: "https://officialsbooks.com"
+  tagline: "Financial Operating System for Sports Officials"
+  status: "Live Market"
+  status_class: "status-live"
+  description: "A multi-tenant SaaS platform that streamlines scheduling, billing, and payments for sports officiating chapters. Syncs directly with ArbiterSports for automated invoicing and 1099 compliance."
+  stack: ".NET 10 · React 19 · PostgreSQL"
+  cta_text: "Visit Platform"
+  logo_path: "/assets/images/officialsbooks-icon.png"
+  social:
+    x: "https://x.com/OfficialsBooks"
+    facebook: "https://facebook.com/OfficialsBooks"
+    instagram: "https://instagram.com/OfficialsBooks"
+    youtube: "https://youtube.com/@OfficialsBooks"
+    linkedin: "https://linkedin.com/company/officialsbooks"
+
+- name: "Stealth Mobile App"
+  url: "#"
+  tagline: "College Nightlife Scene"
+  status: "In Development"
+  status_class: "status-dev"
+  description: "A mobile-first platform for the college nightlife market. Native iOS and Android apps powered by a modern cloud backend."
+  stack: "React Native · .NET 10 · PostgreSQL"
+  cta_text: "Coming February 2026"
+  logo_path: ""

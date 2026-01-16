@@ -1,0 +1,115 @@
+<section class="venture-studio">
+  <div class="venture-intro">
+    <h2>Venture Studio</h2>
+    <p>We test our architectural principles by building and launching our own products.</p>
+  </div>
+
+  <div class="venture-carousel-container">
+    <div class="swiper venture-swiper">
+      <div class="swiper-wrapper">
+        {% for venture in site.data.ventures %}
+        <div class="swiper-slide">
+          <div class="venture-card">
+
+            <div class="venture-card-header">
+              {% if venture.logo_path and venture.logo_path != "" %}
+                <img src="{{ venture.logo_path }}" alt="{{ venture.name }} Logo" class="venture-logo">
+              {% else %}
+                <div class="venture-logo-fallback">
+                  {% if venture.status == "In Development" %}
+                    <i class="fas fa-rocket"></i>
+                  {% else %}
+                    APP
+                  {% endif %}
+                </div>
+              {% endif %}
+
+              <span class="venture-status {{ venture.status_class }}">
+                {{ venture.status }}
+              </span>
+            </div>
+
+            <div class="venture-card-body">
+              <h3>{{ venture.name }}</h3>
+              <p class="venture-tagline">{{ venture.tagline }}</p>
+              <p class="venture-description">{{ venture.description }}</p>
+            </div>
+
+            <div class="venture-card-footer">
+              <div class="venture-stack">{{ venture.stack }}</div>
+
+              {% if venture.social %}
+              <div class="venture-social">
+                {% if venture.social.x %}
+                <a href="{{ venture.social.x }}" target="_blank" rel="noopener noreferrer" title="{{ venture.name }} on X"><i class="fab fa-x-twitter" aria-hidden="true"></i></a>
+                {% endif %}
+                {% if venture.social.facebook %}
+                <a href="{{ venture.social.facebook }}" target="_blank" rel="noopener noreferrer" title="{{ venture.name }} on Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
+                {% endif %}
+                {% if venture.social.instagram %}
+                <a href="{{ venture.social.instagram }}" target="_blank" rel="noopener noreferrer" title="{{ venture.name }} on Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                {% endif %}
+                {% if venture.social.youtube %}
+                <a href="{{ venture.social.youtube }}" target="_blank" rel="noopener noreferrer" title="{{ venture.name }} on YouTube"><i class="fab fa-youtube" aria-hidden="true"></i></a>
+                {% endif %}
+                {% if venture.social.linkedin %}
+                <a href="{{ venture.social.linkedin }}" target="_blank" rel="noopener noreferrer" title="{{ venture.name }} on LinkedIn"><i class="fab fa-linkedin" aria-hidden="true"></i></a>
+                {% endif %}
+              </div>
+              {% endif %}
+
+              {% if venture.url != "#" %}
+              <a href="{{ venture.url }}" target="_blank" rel="noopener noreferrer" class="venture-link">
+                {{ venture.cta_text }} &rarr;
+              </a>
+              {% else %}
+              <span class="venture-link disabled">{{ venture.cta_text }}</span>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Navigation arrows -->
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+
+      <!-- Pagination dots -->
+      <div class="swiper-pagination"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof Swiper !== 'undefined') {
+    new Swiper('.venture-swiper', {
+      slidesPerView: 1,
+      spaceBetween: 30,
+      loop: true,
+      centeredSlides: true,
+      autoplay: {
+        delay: 6000,
+        disableOnInteraction: false,
+        pauseOnMouseEnter: true,
+      },
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+      },
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+      },
+      breakpoints: {
+        768: {
+          slidesPerView: 1,
+          spaceBetween: 40,
+        }
+      }
+    });
+  }
+});
+</script>
