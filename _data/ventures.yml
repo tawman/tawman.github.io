@@ -17,6 +17,16 @@
     youtube: "https://youtube.com/@OfficialsBooks"
     linkedin: "https://linkedin.com/company/officialsbooks"
 
+- name: HOA Board Platform
+  url: "#"
+  tagline: "Board-Management Platform for Homeowner Associations"
+  status: "Live Market"
+  status_class: "status-live"
+  description: "A purpose-built board-management platform for our ~80-home neighborhood HOA in the Austin area. Pairs an interactive neighborhood map—rendered from real OpenStreetMap building footprints—with full community operations: owners, dues, valuations, violations, ACC requests, work orders, projects, and committees. Includes AI-assisted data backfill through a custom MCP server."
+  stack: ".NET 10 · React 19 · PostgreSQL · Leaflet"
+  cta_text: "Live · Private Deployment"
+  logo_path: "/assets/images/hoa-icon.png"
+
 - name: "Stealth Mobile App"
   url: "#"
   tagline: "College Nightlife Scene"
@@ -24,5 +34,5 @@
   status_class: "status-dev"
   description: "A mobile-first platform for the college nightlife market. Native iOS and Android apps powered by a modern cloud backend."
   stack: "React Native · .NET 10 · PostgreSQL"
-  cta_text: "Coming February 2026"
+  cta_text: "Coming Summer 2026"
   logo_path: ""
